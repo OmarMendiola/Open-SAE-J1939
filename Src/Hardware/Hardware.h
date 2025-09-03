@@ -11,14 +11,14 @@
 /* Select your target platform here */
 #define NO_PLATFORM 0
 #define STM32 1
-#define ARDUINO 2
+#define J1939_ARDUINO 2
 #define PIC 3
 #define AVR 4
 #define QT_USB 5
 #define INTERNAL_CALLBACK 6
 #define SOCKETCAN 7
 #ifndef OPENSAE_J1939_TARGET_PLATFORM
-#define OPENSAE_J1939_TARGET_PLATFORM NO_PLATFORM
+#define OPENSAE_J1939_TARGET_PLATFORM J1939_ARDUINO
 #endif
 
 /* C Standard library */

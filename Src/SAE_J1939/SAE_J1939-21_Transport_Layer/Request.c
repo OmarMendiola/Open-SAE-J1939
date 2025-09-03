@@ -13,6 +13,10 @@
 #include "../SAE_J1939-71_Application_Layer/Application_Layer.h"
 #include "../SAE_J1939-81_Network_Management_Layer/Network_Management_Layer.h"
 
+/*Defines*/
+#define CAN_ID_REQUEST_BASE 0x18EA //Priority(6),R(0),DP(0), PF(0xEA)= PGN(59904 (0x00EA00))
+
+
 /*
  * Read a PGN request from another ECU about PGN information at this ECU. All listed PGN should be here
  * PGN: 0x00EA00 (59904)
@@ -186,6 +190,6 @@ ENUM_J1939_STATUS_CODES SAE_J1939_Send_Request(J1939 *j1939, uint8_t DA, uint32_
 	PGN[0] = PGN_code;														/* PGN least significant bit */
 	PGN[1] = PGN_code >> 8;													/* PGN mid bit */
 	PGN[2] = PGN_code >> 16;												/* PGN most significant bit */
-	uint32_t ID = (0x18EA << 16) | (DA << 8) | j1939->information_this_ECU.this_ECU_address;
+	uint32_t ID = (CAN_ID_REQUEST_BASE << 16) | (DA << 8) | j1939->information_this_ECU.this_ECU_address;
 	return CAN_Send_Request(ID, PGN);
 }

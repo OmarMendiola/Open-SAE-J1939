@@ -21,7 +21,7 @@ bool Save_Struct(uint8_t data[], uint32_t data_length, char file_name[]){
 	STM32_PLC_SD_Close_File();
 	STM32_PLC_SD_Unmount_Card();
 	return true;
-#elif OPENSAE_J1939_TARGET_PLATFORM == ARDUINO
+#elif OPENSAE_J1939_TARGET_PLATFORM == J1939_ARDUINO
 	/* Implement your memory handler function for the Arduino platform */
 #elif OPENSAE_J1939_TARGET_PLATFORM == PIC
 	/* Implement your memory handler function for the PIC platform */
@@ -51,7 +51,7 @@ bool Load_Struct(uint8_t data[], uint32_t data_length, char file_name[]){
 	STM32_PLC_SD_Close_File();
 	STM32_PLC_SD_Unmount_Card();
 	return true;
-#elif OPENSAE_J1939_TARGET_PLATFORM == ARDUINO
+#elif OPENSAE_J1939_TARGET_PLATFORM == J1939_ARDUINO
 	/* Implement your memory handler function for the Arduino platform */
 #elif OPENSAE_J1939_TARGET_PLATFORM == PIC
 	/* Implement your memory handler function for the PIC platform */

@@ -10,15 +10,45 @@
 /* Layers */
 #include "../Hardware/Hardware.h"
 
+static void Startup_ECU_SetJ1939Defaults(J1939* j1939) 
+{
+	/* Set default values for the J1939 structure */
+	memset(j1939, 0, sizeof(J1939));
+	uint8_t i;
+	for (i = 0; i < 255; i++) 
+	{
+		j1939->other_ECU_address[i] = 0xFF;
+	}
+
+	char text[] = "Gateway J1939 a J1708";
+	j1939->information_this_ECU.this_identifications.software_identification.number_of_fields = sizeof(text);
+	
+	for (i = 0; i < sizeof(text); i++) {
+		j1939->information_this_ECU.this_identifications.software_identification.identifications[i] = (uint8_t)text[i];
+	}
+	// Set defaul for other ECU identification
+	char text2[] = "No received";
+	j1939->from_other_ecu_identifications.software_identification.number_of_fields = sizeof(text2);
+	for (i = 0; i < sizeof(text2); i++) {
+		j1939->from_other_ecu_identifications.software_identification.identifications[i] = (uint8_t)text2[i];
+	}
+	j1939->from_other_ecu_identifications.software_identification.from_ecu_address = 0xFF;
+}
+
 /* Load our ECU parameters into J1939 structure. Very useful if you want your ECU remember its NAME + address + identifications at startup. */
 bool Open_SAE_J1939_Startup_ECU(J1939* j1939) {
 	uint32_t ECU_information_length = sizeof(Information_this_ECU);
 	uint8_t ECU_information_data[sizeof(Information_this_ECU)];
 	memset(ECU_information_data, 0, ECU_information_length);
-	if(!Load_Struct(ECU_information_data, ECU_information_length, (char*)INFORMATION_THIS_ECU)){
-		return false; /* Problems occurs */
-	}
-	memcpy(&j1939->information_this_ECU, (Information_this_ECU*)ECU_information_data, ECU_information_length);
+
+	/* Set default values for the J1939 structure */
+	Startup_ECU_SetJ1939Defaults(j1939);
+
+	/* Load the information about this ECU from memory - Read the memory is not implemented yet. */
+	// if(!Load_Struct(ECU_information_data, ECU_information_length, (char*)INFORMATION_THIS_ECU)){
+	// 	return false; /* Problems occurs */
+	// }
+	// memcpy(&j1939->information_this_ECU, (Information_this_ECU*)ECU_information_data, ECU_information_length);
 
 	/* If we are going to send and receive the ECU identification and component identification, we need to specify the size of them */
 	j1939->information_this_ECU.this_identifications.ecu_identification.length_of_each_field = MAX_IDENTIFICATION;

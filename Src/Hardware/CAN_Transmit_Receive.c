@@ -6,7 +6,15 @@
  */
 
  /* Layer */
+#include "DueCANLayer.h"
 #include "Hardware.h"
+
+#define CAN_CH 1U
+// CAN Layer functions
+// extern byte canInit(byte cPort, long lBaudRate);
+// extern byte canTx(byte cPort, long lMsgID, bool bExtendedFormat, byte* cData, byte cDataLen);
+// extern byte canRx(byte cPort, long* lMsgID, bool* bExtendedFormat, byte* cData, byte* cDataLen);
+// extern void DueCanLayer_PrintStatus (byte cPort);
 
 /* This is a call back function e.g listener, that will be called once SAE J1939 data is going to be sent */
 static void (*Callback_Function_Send)(uint32_t, uint8_t, uint8_t[]) = NULL;
@@ -17,7 +25,7 @@ static void (*Callback_Function_Delay_ms)(uint8_t) = NULL;
 /* Platform independent library headers for CAN */
 #if OPENSAE_J1939_TARGET_PLATFORM == STM32
 #include "main.h"
-#elif OPENSAE_J1939_TARGET_PLATFORM == ARDUINO
+#elif OPENSAE_J1939_TARGET_PLATFORM == J1939_ARDUINO
 #elif OPENSAE_J1939_TARGET_PLATFORM == PIC
 #elif OPENSAE_J1939_TARGET_PLATFORM == AVR
 #elif OPENSAE_J1939_TARGET_PLATFORM == QT_USB
@@ -26,7 +34,7 @@ static void (*Callback_Function_Delay_ms)(uint8_t) = NULL;
 /* Nothing here because else statement should not be running */
 #elif OPENSAE_J1939_TARGET_PLATFORM == SOCKETCAN
 #include <unistd.h>
-#include "SocketCAN.h"
+//#include "SocketCAN.h"
 #else
 /* Internal fields */
 static bool internal_new_message[256] = { false };
@@ -87,8 +95,12 @@ ENUM_J1939_STATUS_CODES CAN_Send_Message(uint32_t ID, uint8_t data[]) {
 	TxHeader.ExtId = ID;
 	TxHeader.StdId = 0x00; 										/* Not used */
 	status = STM32_PLC_CAN_Transmit(data, &TxHeader);
-#elif OPENSAE_J1939_TARGET_PLATFORM == ARDUINO
-	/* Implement your CAN send 8 bytes message function for the Arduino platform */
+#elif OPENSAE_J1939_TARGET_PLATFORM == J1939_ARDUINO
+/* Implement your CAN send 8 bytes message function for the J1939_ARDUINO platform */
+	if(canTx(CAN_CH, ID, true, data, 8) == CAN_OK)
+	status = STATUS_SEND_OK;
+  else
+	status = STATUS_SEND_ERROR;
 #elif OPENSAE_J1939_TARGET_PLATFORM == PIC
 	/* Implement your CAN send 8 bytes message function for the PIC platform */
 #elif OPENSAE_J1939_TARGET_PLATFORM == AVR
@@ -128,8 +140,12 @@ ENUM_J1939_STATUS_CODES CAN_Send_Request(uint32_t ID, uint8_t PGN[]) {
 	TxHeader.ExtId = ID;
 	TxHeader.StdId = 0x00; 										/* Not used */
 	status = STM32_PLC_CAN_Transmit(PGN, &TxHeader);
-#elif OPENSAE_J1939_TARGET_PLATFORM == ARDUINO
-	/* Implement your CAN send 3 bytes message function for the Arduino platform */
+#elif OPENSAE_J1939_TARGET_PLATFORM == J1939_ARDUINO
+	/* Implement your CAN send 3 bytes message function for the J1939_ARDUINO platform */
+	if(canTx(CAN_CH, ID, true, PGN, 3) == CAN_OK)
+		status = STATUS_SEND_OK;
+	else
+		status = STATUS_SEND_ERROR;
 #elif OPENSAE_J1939_TARGET_PLATFORM == PIC
 	/* Implement your CAN send 3 bytes message function for the PIC platform */
 #elif OPENSAE_J1939_TARGET_PLATFORM == AVR
@@ -157,11 +173,22 @@ ENUM_J1939_STATUS_CODES CAN_Send_Request(uint32_t ID, uint8_t PGN[]) {
 
 /* Read the current CAN-bus message. Returning false if the message has been read before, else true */
 bool CAN_Read_Message(uint32_t* ID, uint8_t data[]) {
+byte u8DataLen = 0;
+bool bExtendedFormat = true;
+
 	bool is_new_message = false;
 #if OPENSAE_J1939_TARGET_PLATFORM == STM32
 	STM32_PLC_CAN_Get_ID_Data(ID, data, &is_new_message);
-#elif OPENSAE_J1939_TARGET_PLATFORM == ARDUINO
-	/* Implement your CAN function to get ID, data[] and the flag is_new_message here for the Arduino platform */
+#elif OPENSAE_J1939_TARGET_PLATFORM == J1939_ARDUINO
+	/* Implement your CAN function to get ID, data[] and the flag is_new_message here for the J1939_ARDUINO platform */
+	if(canRx(CAN_CH, (long*)ID, &bExtendedFormat, (byte*)&data[0], &u8DataLen) == CAN_OK)
+	{
+		is_new_message = true;
+	} 
+	else 
+	{
+		is_new_message = false;
+	}
 #elif OPENSAE_J1939_TARGET_PLATFORM == PIC
 	/* Implement your CAN function to get ID, data[] and the flag is_new_message here for the PIC platform */
 #elif OPENSAE_J1939_TARGET_PLATFORM == AVR
@@ -199,7 +226,8 @@ void CAN_Set_Callback_Functions(void (*Callback_Function_Send_)(uint32_t, uint8_
 void CAN_Delay(uint8_t milliseconds) {
 #if OPENSAE_J1939_TARGET_PLATFORM == STM32
 
-#elif OPENSAE_J1939_TARGET_PLATFORM == ARDUINO
+#elif OPENSAE_J1939_TARGET_PLATFORM == J1939_ARDUINO
+	delay(milliseconds);
 
 #elif OPENSAE_J1939_TARGET_PLATFORM == PIC
 

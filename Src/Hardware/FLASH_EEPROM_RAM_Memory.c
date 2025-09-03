@@ -20,7 +20,7 @@
 void FLASH_EEPROM_RAM_Memory(uint16_t *number_of_requested_bytes, uint8_t pointer_type, uint8_t *command, uint32_t *pointer, uint8_t *pointer_extension, uint16_t *key, uint8_t raw_binary_data[]){
 #if OPENSAE_J1939_TARGET_PLATFORM == STM32
 	/* Implement your memory handler function for the STM32 platform */
-#elif OPENSAE_J1939_TARGET_PLATFORM == ARDUINO
+#elif OPENSAE_J1939_TARGET_PLATFORM == J1939_ARDUINO
 	/* Implement your memory handler function for the Arduino platform */
 #elif OPENSAE_J1939_TARGET_PLATFORM == PIC
 	/* Implement your memory handler function for the PIC platform */

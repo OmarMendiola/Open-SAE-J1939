@@ -46,6 +46,8 @@ static SAE_J1939_INLINE uint8_t SAE_J1939_Transport_Protocol_GetNumberOfPackages
 	return total_message_size_being_transmitted % 7 > 0 ? total_message_size_being_transmitted / 7 + 1 : total_message_size_being_transmitted / 7; /* Rounding up */
 }
 
+uint8_t SAE_J1939_Transport_Protocol_Tx (J1939 *j1939, uint8_t DA, uint8_t data[], uint16_t u16DataLength, uint32_t PGN, uint8_t u8priority);
+
 #ifdef __cplusplus
 }
 #endif

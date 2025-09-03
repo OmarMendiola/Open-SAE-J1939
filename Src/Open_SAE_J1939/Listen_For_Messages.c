@@ -6,16 +6,46 @@
  */
 
 #include "Open_SAE_J1939.h"
+#include "stdio.h"
 
 /* Layers */
 #include "../ISO_11783/ISO_11783-7_Application_Layer/Application_Layer.h"
 #include "../Hardware/Hardware.h"
+
+#ifdef __cplusplus //temporal solution to link C functions with C++ code
+extern "C" {
+#endif
+
+extern void AtCommand_PrintWrapper(const char* format) ;
+
+#ifdef __cplusplus
+}
+#endif
+
+// Estructura para el desglose de un ID de CAN J1939 de 29 bits
+typedef union  
+{
+    uint32_t raw_id;
+
+    struct {
+        uint8_t source_address; // Dirección de Origen (8 bits)
+        uint8_t pdu_specific;   // Específico de PDU (PS) (8 bits)
+        uint8_t pdu_format;     // Formato de PDU (PF) (8 bits)
+        uint8_t data_page : 1;  // Página de Datos (DP) (1 bit)
+        uint8_t reserved : 1;   // Reservado (1 bit)
+        uint8_t priority : 3;   // Prioridad (3 bits)
+        uint8_t : 3;            // Bits no utilizados
+    } fields;
+}J1939_CAN_ID;
+
+char pszBuffer[127];
 
 /* This function should be called all the time, or be placed inside an interrupt listener */
 ENUM_J1939_RX_MSG Open_SAE_J1939_Listen_For_Messages(J1939* j1939) {
 	uint32_t ID = 0;
 	uint8_t data[8] = {0};
 	ENUM_J1939_RX_MSG rx_msg = RX_MSG_NONE;
+	J1939_CAN_ID* pcan_Id;
 	bool is_new_message = CAN_Read_Message(&ID, data);
 	if(is_new_message) {
 		/* Save latest */
@@ -36,6 +66,16 @@ ENUM_J1939_RX_MSG Open_SAE_J1939_Listen_For_Messages(J1939* j1939) {
 		}else{
     			PGN = (ID >> 8) & 0x3FF00UL; /* Mask for including EDP, DP, and PF only (exclude PS) */
 		}
+
+		pcan_Id = (J1939_CAN_ID*)&ID;
+
+		/* Debug print */	
+		snprintf(pszBuffer,(sizeof(pszBuffer) - 1), "J1939 Received: ID: 0x%08X | PGN: 0x%05X | Pri: %u | DP: %u | PF: %u | PS/DA: %u | SA: %u | Data: ", ID, PGN, pcan_Id->fields.priority, pcan_Id->fields.data_page, pcan_Id->fields.pdu_format, pcan_Id->fields.pdu_specific, pcan_Id->fields.source_address);
+		AtCommand_PrintWrapper(pszBuffer);
+		snprintf(pszBuffer,(sizeof(pszBuffer) - 1), " %02X %02X %02X %02X %02X %02X %02X %02X \n\r", data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
+		AtCommand_PrintWrapper(pszBuffer);
+		AtCommand_PrintWrapper("\n\r");
+
 
 		rx_msg = RX_MSG_NOT_SUPPORTED;
 
@@ -120,6 +160,10 @@ ENUM_J1939_RX_MSG Open_SAE_J1939_Listen_For_Messages(J1939* j1939) {
 			rx_msg = RX_MSG_UNKNOWN;																			/* The message was not meant for this ECU */
 		}
 		/* Add more else if statement here */
+	}
+	else
+	{
+		///AtCommand_PrintWrapper("NO LLEgo mensaje");
 	}
 	return rx_msg;
 }
