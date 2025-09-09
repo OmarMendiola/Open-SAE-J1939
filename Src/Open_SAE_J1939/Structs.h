@@ -311,4 +311,20 @@ typedef struct{
   };
 } SAE_Application_Info;
 
+// Estructura para el desglose de un ID de CAN J1939 de 29 bits
+typedef union  
+{
+    uint32_t raw_id;
+
+    struct {
+        uint8_t source_address; // Dirección de Origen (8 bits)
+        uint8_t pdu_specific;   // Específico de PDU (PS) (8 bits)
+        uint8_t pdu_format;     // Formato de PDU (PF) (8 bits)
+        uint8_t data_page : 1;  // Página de Datos (DP) (1 bit)
+        uint8_t reserved : 1;   // Reservado (1 bit)
+        uint8_t priority : 3;   // Prioridad (3 bits)
+        uint8_t : 3;            // Bits no utilizados
+    } fields;
+}J1939_CAN_ID;
+
 #endif /* OPEN_SAE_J1939_OPEN_SAE_J1939_STRUCTS_H_ */

@@ -33,6 +33,8 @@ static void Startup_ECU_SetJ1939Defaults(J1939* j1939)
 		j1939->from_other_ecu_identifications.software_identification.identifications[i] = (uint8_t)text2[i];
 	}
 	j1939->from_other_ecu_identifications.software_identification.from_ecu_address = 0xFF;
+
+	j1939->information_this_ECU.this_ECU_address = 0xAE;
 }
 
 /* Load our ECU parameters into J1939 structure. Very useful if you want your ECU remember its NAME + address + identifications at startup. */

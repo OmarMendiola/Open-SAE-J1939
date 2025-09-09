@@ -60,6 +60,11 @@ bool Open_SAE_J1939_Startup_ECU(J1939* j1939);
 /* This function should ONLY be called at your ECU closedown */
 bool Open_SAE_J1939_Closedown_ECU(J1939* j1939);
 
+/*Test trasmission*/
+void Open_SAE_J1939_Test_Trasmission(J1939* j1939);
+void Open_SAE_J1939_Test_Trasmission_multipacket(J1939* j1939);
+
+
 #ifdef __cplusplus
 }
 #endif
