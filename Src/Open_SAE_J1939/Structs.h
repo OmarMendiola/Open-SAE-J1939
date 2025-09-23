@@ -10,6 +10,7 @@
 
  /* For the C89 standard ints */
 #include "C89_Library.h"
+#include "unit_phy.h"
 
 /* For the C++ standard ints */
 #ifdef __cplusplus
@@ -326,5 +327,36 @@ typedef union
         uint8_t : 3;            // Bits no utilizados
     } fields;
 }J1939_CAN_ID;
+
+
+
+/*PGN and SPN structs*/
+
+
+typedef struct {
+    uint32_t    u32Number;
+    const char* pszName;
+    uint8_t     u8StartByte;
+    uint8_t     u8StartBit;
+    uint8_t     u8LengthBits;
+    float       fScaling;
+    float       fOffset;
+    eUnitPhy_ID eUnitId;
+} J1939_SPN_t;
+
+typedef struct {
+    uint32_t           u32Number;
+    const char* pszName;
+    uint8_t            u8Priority;
+    const J1939_SPN_t* pasSPNs;
+    uint8_t            u8NumSpns;
+} J1939_PGN_t;
+
+// --- ESTRUCTURA PARA EL RESULTADO DE LA DECODIFICACIÓN ---
+typedef struct {
+    const J1939_SPN_t* psDefinition;
+    uint64_t           u64RawValue;
+    double             dPhysicalValue;
+} J1939_Decoded_SPN_t;
 
 #endif /* OPEN_SAE_J1939_OPEN_SAE_J1939_STRUCTS_H_ */

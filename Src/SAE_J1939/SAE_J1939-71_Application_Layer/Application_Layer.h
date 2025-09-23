@@ -17,10 +17,14 @@
 #include "../SAE_J1939_Enums/Enum_NAME.h"
 #include "../SAE_J1939_Enums/Enum_PGN.h"
 #include "../SAE_J1939_Enums/Enum_Send_Status.h"
+#include "../SAE_J1939_Enums/Enum_Aplication_layer.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+extern const J1939_PGN_t g_asPgnDatabase[];
+extern const size_t G_SZ_PGN_DATABASE_SIZE;
 
 extern void (*Callback_Function_Application)(SAE_Application_Info);
 
@@ -52,6 +56,11 @@ ENUM_J1939_STATUS_CODES SAE_J1939_Send_Request_Proprietary_B(J1939* j1939, uint8
 ENUM_J1939_STATUS_CODES SAE_J1939_Response_Request_Proprietary_B(J1939* j1939, uint8_t DA, uint32_t PGN, bool * is_supported);
 void SAE_J1939_Read_Response_Request_Proprietary_B(J1939* j1939, uint8_t SA, uint32_t PGN, uint8_t data[]);
 struct Proprietary_B * Get_Proprietary_B_By_PGN(struct Proprietary * proprietary, uint32_t PGN);
+
+/* Decode functions */
+J1939_Decode_Status_e j1939_decode_spn(J1939_Decoded_SPN_t* psResult, const J1939_SPN_t* psSPN, const uint8_t* pu8PgnData);
+const J1939_PGN_t* j1939_find_pgn(const J1939_PGN_t* pasPgnDatabase, size_t szDbSize, uint32_t u32PgnNumber);
+const J1939_SPN_t* j1939_pgn_find_spn(const J1939_PGN_t* psPGN, uint32_t u32SpnNumber);
 
 #ifdef __cplusplus
 }
