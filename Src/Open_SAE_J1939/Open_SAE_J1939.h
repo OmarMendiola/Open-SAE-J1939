@@ -64,6 +64,9 @@ bool Open_SAE_J1939_Closedown_ECU(J1939* j1939);
 void Open_SAE_J1939_Test_Trasmission(J1939* j1939);
 void Open_SAE_J1939_Test_Trasmission_multipacket(J1939* j1939);
 
+/*Get informaticon from the bus*/
+bool Open_SAE_J1939_ReadPGN(J1939_RX_PGN_t* pReceivedPGN);
+J1939_Decode_Status_e  Open_SAE_J1939_DecodeSPN(J1939_Decoded_SPN_t* psResult, const J1939_SPN_t* psSPN, const uint8_t* pu8PgnData);
 
 #ifdef __cplusplus
 }

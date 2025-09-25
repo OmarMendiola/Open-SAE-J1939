@@ -18,6 +18,7 @@
 #include "../SAE_J1939_Enums/Enum_PGN.h"
 #include "../SAE_J1939_Enums/Enum_Send_Status.h"
 #include "../SAE_J1939_Enums/Enum_Aplication_layer.h"
+#include "../SAE_J1939_Enums/Enum_SPN_ID.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,6 +26,7 @@ extern "C" {
 
 extern const J1939_PGN_t g_asPgnDatabase[];
 extern const size_t G_SZ_PGN_DATABASE_SIZE;
+extern const size_t G_SPN_DATABAE_SIZE;
 
 extern void (*Callback_Function_Application)(SAE_Application_Info);
 

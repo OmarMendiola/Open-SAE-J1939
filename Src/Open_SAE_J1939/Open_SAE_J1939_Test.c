@@ -45,16 +45,16 @@ uint8_t u8Result;
 
     u8Result = SAE_J1939_Transport_Protocol_Tx(j1939, 0xFF, data, 8, 0x00F005, 6); // Send a DM1 message as a test
 
-    if (u8Result == STATUS_SEND_OK) {
-        AtCommand_PrintWrapper("J1939 Test Transmission: Message sent successfully.\n\r");
-    } else if (u8Result == STATUS_SEND_ERROR) {
-        AtCommand_PrintWrapper("J1939 Test Transmission: Error sending message.\n\r");
-    } else if (u8Result == STATUS_SEND_BUSY) {
-        AtCommand_PrintWrapper("J1939 Test Transmission: Busy, message not sent.\n\r");
-    } else
-    {
-        /* code */
-    }
+    // if (u8Result == STATUS_SEND_OK) { test pfmm
+    //     AtCommand_PrintWrapper("J1939 Test Transmission: Message sent successfully.\n\r");
+    // } else if (u8Result == STATUS_SEND_ERROR) {
+    //     AtCommand_PrintWrapper("J1939 Test Transmission: Error sending message.\n\r");
+    // } else if (u8Result == STATUS_SEND_BUSY) {
+    //     AtCommand_PrintWrapper("J1939 Test Transmission: Busy, message not sent.\n\r");
+    // } else
+    // {
+    //     /* code */
+    // }
     
 };
 

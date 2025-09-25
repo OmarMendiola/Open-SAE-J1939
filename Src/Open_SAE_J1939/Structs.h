@@ -11,6 +11,7 @@
  /* For the C89 standard ints */
 #include "C89_Library.h"
 #include "unit_phy.h"
+#include "../SAE_J1939/SAE_J1939_Enums/Enum_SPN_ID.h"
 
 /* For the C++ standard ints */
 #ifdef __cplusplus
@@ -334,22 +335,23 @@ typedef union
 
 
 typedef struct {
-    uint32_t    u32Number;
-    const char* pszName;
-    uint8_t     u8StartByte;
-    uint8_t     u8StartBit;
-    uint8_t     u8LengthBits;
-    float       fScaling;
-    float       fOffset;
-    eUnitPhy_ID eUnitId;
+    uint32_t            u32Number;
+    const char*         pszName;
+    uint8_t             u8StartByte;
+    uint8_t             u8StartBit;
+    uint8_t             u8LengthBits;
+    float               fScaling;
+    float               fOffset;
+    eUnitPhy_ID         eUnitId;
+	ENUM_SPN_LOCAL_ID   eLocalId;
 } J1939_SPN_t;
 
 typedef struct {
-    uint32_t           u32Number;
-    const char* pszName;
-    uint8_t            u8Priority;
-    const J1939_SPN_t* pasSPNs;
-    uint8_t            u8NumSpns;
+    uint32_t           	u32Number;
+    const char* 		pszName;
+    uint8_t            	u8Priority;
+    const J1939_SPN_t* 	pasSPNs;
+    uint8_t            	u8NumSpns;
 } J1939_PGN_t;
 
 // --- ESTRUCTURA PARA EL RESULTADO DE LA DECODIFICACIÓN ---
@@ -358,5 +360,15 @@ typedef struct {
     uint64_t           u64RawValue;
     double             dPhysicalValue;
 } J1939_Decoded_SPN_t;
+
+
+/* PGN reception Buffer*/
+typedef struct
+{
+	J1939_PGN_t* psPGNInfo;
+	uint32_t u32Timestamp; /* Timestamp of reception */
+	uint8_t  au8Data[8];    /* Data of the message */
+}J1939_RX_PGN_t;
+
 
 #endif /* OPEN_SAE_J1939_OPEN_SAE_J1939_STRUCTS_H_ */

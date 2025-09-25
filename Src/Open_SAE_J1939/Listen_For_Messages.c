@@ -7,6 +7,7 @@
 
 #include "Open_SAE_J1939.h"
 #include "stdio.h"
+#include "CircularBuffer.h"
 
 /* Layers */
 #include "../ISO_11783/ISO_11783-7_Application_Layer/Application_Layer.h"
@@ -15,6 +16,9 @@
 #ifdef __cplusplus //temporal solution to link C functions with C++ code
 extern "C" {
 #endif
+
+// VARIABLES
+CIRCULAR_BUF_DEFINE(casPGN_RX_buffer,J1939_RX_PGN_t,10);
 
 extern void AtCommand_PrintWrapper(const char* format) ;
 
@@ -60,6 +64,26 @@ ENUM_J1939_RX_MSG Open_SAE_J1939_Listen_For_Messages(J1939* j1939) {
 		AtCommand_PrintWrapper(pszBuffer);
 		AtCommand_PrintWrapper("\n\r");
 
+		// Find PGN in database
+		const J1939_PGN_t* psPGN_info = j1939_find_pgn(g_asPgnDatabase, G_SZ_PGN_DATABASE_SIZE,PGN);
+		if(psPGN_info != NULL) {
+			// PGN found in database
+			if(circular_buf_is_full(&casPGN_RX_buffer) == false) {
+				// We have space in h buffer
+				J1939_RX_PGN_t pgn_entry;
+				pgn_entry.psPGNInfo = (J1939_PGN_t*)psPGN_info;
+				memcpy(pgn_entry.au8Data, data, 8);
+				circular_buf_push(&casPGN_RX_buffer, &pgn_entry);
+				AtCommand_PrintWrapper("OK\n\r");
+			}
+			else {
+				AtCommand_PrintWrapper("NOT OK 2\n\r");
+			}
+		} else {
+			AtCommand_PrintWrapper("NOT OK\n\r");
+			// PGN not found in database
+			// Handle unknown PGN if necessary
+		}
 
 		rx_msg = RX_MSG_NOT_SUPPORTED;
 
@@ -151,3 +175,20 @@ ENUM_J1939_RX_MSG Open_SAE_J1939_Listen_For_Messages(J1939* j1939) {
 	}
 	return rx_msg;
 }
+
+
+ bool Open_SAE_J1939_ReadPGN(J1939_RX_PGN_t* pReceivedPGN)
+ {
+	 if(circular_buf_is_empty(&casPGN_RX_buffer) == false) {
+		 circular_buf_pop(&casPGN_RX_buffer, pReceivedPGN);
+		 return true;
+	 } else {
+		 return false;
+	 }
+ }	
+
+ J1939_Decode_Status_e  Open_SAE_J1939_DecodeSPN(J1939_Decoded_SPN_t* psResult, const J1939_SPN_t* psSPN, const uint8_t* pu8PgnData)
+ {
+	J1939_Decode_Status_e eStatus = j1939_decode_spn(&psResult, psSPN, pu8PgnData);
+	return eStatus;
+ }
