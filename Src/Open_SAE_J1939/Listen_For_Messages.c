@@ -13,6 +13,8 @@
 #include "../ISO_11783/ISO_11783-7_Application_Layer/Application_Layer.h"
 #include "../Hardware/Hardware.h"
 
+#define TEST_LISTEN_FOR_MESSAGES 0
+
 #ifdef __cplusplus //temporal solution to link C functions with C++ code
 extern "C" {
 #endif
@@ -27,6 +29,30 @@ extern void AtCommand_PrintWrapper(const char* format) ;
 #endif
 
 char pszBuffer[127];
+
+static inline void test_check_bufffer_counters(void)
+{
+#if TEST_LISTEN_FOR_MESSAGES == 1
+	#warning "TEST_LISTEN_FOR_MESSAGES is enabled"
+	snprintf(pszBuffer,(sizeof(pszBuffer) - 1), "Buffer head: %u | Buffer tail: %u | Buffer size: %u | Buffer capacity: %u \n\r", casPGN_RX_buffer.head, casPGN_RX_buffer.tail, circular_buf_get_size(&casPGN_RX_buffer), circular_buf_get_capacity(&casPGN_RX_buffer));
+	AtCommand_PrintWrapper(pszBuffer);
+#endif
+}
+
+static inline void test_print_CAN_message(J1939_CAN_ID* pcan_Id, uint32_t ID, uint32_t PGN, uint8_t* data)
+{
+#if TEST_LISTEN_FOR_MESSAGES == 1
+	#warning "test_print_CAN_message is enabled"
+	/* Debug print */	
+	snprintf(pszBuffer,(sizeof(pszBuffer) - 1), "J1939 Received: ID: 0x%08X | PGN: 0x%05X | Pri: %u | DP: %u | PF: %u | PS/DA: %u | SA: %u | Data: ", ID, PGN, pcan_Id->fields.priority, pcan_Id->fields.data_page, pcan_Id->fields.pdu_format, pcan_Id->fields.pdu_specific, pcan_Id->fields.source_address);
+	AtCommand_PrintWrapper(pszBuffer);
+	snprintf(pszBuffer,(sizeof(pszBuffer) - 1), " %02X %02X %02X %02X %02X %02X %02X %02X \n\r", data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
+	AtCommand_PrintWrapper(pszBuffer);
+	AtCommand_PrintWrapper("\n\r");
+#endif
+}
+
+
 
 /* This function should be called all the time, or be placed inside an interrupt listener */
 ENUM_J1939_RX_MSG Open_SAE_J1939_Listen_For_Messages(J1939* j1939) {
@@ -57,30 +83,22 @@ ENUM_J1939_RX_MSG Open_SAE_J1939_Listen_For_Messages(J1939* j1939) {
 
 		pcan_Id = (J1939_CAN_ID*)&ID;
 
-		/* Debug print */	
-		snprintf(pszBuffer,(sizeof(pszBuffer) - 1), "J1939 Received: ID: 0x%08X | PGN: 0x%05X | Pri: %u | DP: %u | PF: %u | PS/DA: %u | SA: %u | Data: ", ID, PGN, pcan_Id->fields.priority, pcan_Id->fields.data_page, pcan_Id->fields.pdu_format, pcan_Id->fields.pdu_specific, pcan_Id->fields.source_address);
-		AtCommand_PrintWrapper(pszBuffer);
-		snprintf(pszBuffer,(sizeof(pszBuffer) - 1), " %02X %02X %02X %02X %02X %02X %02X %02X \n\r", data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
-		AtCommand_PrintWrapper(pszBuffer);
-		AtCommand_PrintWrapper("\n\r");
-
 		// Find PGN in database
 		const J1939_PGN_t* psPGN_info = j1939_find_pgn(g_asPgnDatabase, G_SZ_PGN_DATABASE_SIZE,PGN);
 		if(psPGN_info != NULL) {
+			test_print_CAN_message(pcan_Id, ID, PGN, data); //test ofmm
 			// PGN found in database
 			if(circular_buf_is_full(&casPGN_RX_buffer) == false) {
+				test_check_bufffer_counters(); //test ofmm
 				// We have space in h buffer
 				J1939_RX_PGN_t pgn_entry;
 				pgn_entry.psPGNInfo = (J1939_PGN_t*)psPGN_info;
 				memcpy(pgn_entry.au8Data, data, 8);
 				circular_buf_push(&casPGN_RX_buffer, &pgn_entry);
-				AtCommand_PrintWrapper("OK\n\r");
 			}
 			else {
-				AtCommand_PrintWrapper("NOT OK 2\n\r");
 			}
 		} else {
-			AtCommand_PrintWrapper("NOT OK\n\r");
 			// PGN not found in database
 			// Handle unknown PGN if necessary
 		}
@@ -179,10 +197,14 @@ ENUM_J1939_RX_MSG Open_SAE_J1939_Listen_For_Messages(J1939* j1939) {
 
  bool Open_SAE_J1939_ReadPGN(J1939_RX_PGN_t* pReceivedPGN)
  {
-	 if(circular_buf_is_empty(&casPGN_RX_buffer) == false) {
-		 circular_buf_pop(&casPGN_RX_buffer, pReceivedPGN);
+	 if(circular_buf_is_empty(&casPGN_RX_buffer) == false) 
+	 {
+		test_check_bufffer_counters(); //test ofmm
+		circular_buf_pop(&casPGN_RX_buffer, pReceivedPGN);
 		 return true;
-	 } else {
+	 } else 
+	 {
+		//test_check_bufffer_counters(); //test ofmm
 		 return false;
 	 }
  }	
